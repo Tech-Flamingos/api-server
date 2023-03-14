@@ -34,9 +34,6 @@ How do you run tests?
 Any tests of note?
 Describe any tests that you did not complete, skipped, etc
 
-### UML
-
-Link to an image of the UML for your application and response to events
 
 ### Cooperation Plan
 
@@ -195,4 +192,4 @@ User Story's
   - be able to create new team groups for users to join (stretch goal)
   - can update/delete groups (stretch goal)
 
-![UML](assets/midterm-UML.png)
+
