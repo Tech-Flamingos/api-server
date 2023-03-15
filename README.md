@@ -1,4 +1,6 @@
-# backend
+# api-server
+
+## thank you dungeons and data for the help with tests. (https://github.com/dungeons-and-data/dungeons-and-data/blob/staging/server/models/User.js)
 
 ## Project: The Timeless Tower
 
@@ -191,5 +193,4 @@ User Story's
   - sign in so the server knows i am a user and knows my name.
   - be able to create new team groups for users to join (stretch goal)
   - can update/delete groups (stretch goal)
-
 

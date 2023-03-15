@@ -1,7 +1,10 @@
 'use strict';
 
+const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
+require('dotenv').config();
+const PORT = process.env.PORT || 3002;
 
 const errorHandler = require('./error-handlers/500.js');
 const notFound = require('./error-handlers/404.js');
@@ -23,10 +26,19 @@ app.use(routes);
 app.use(notFound);
 app.use(errorHandler);
 
-module.exports = {
-  app: app, start: (PORT) => {
-    app.listen(PORT, () => {
-      console.log('Server is running on port ', PORT);
-    });
-  },
-};
+mongoose.set('strictQuery', true);
+async function connectToMongoDB() {
+  try {
+    await console.log(`Connected to MongoDB`);
+    await mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+connectToMongoDB();
+
+function start() {
+  app.listen(PORT, () => console.log(`listening on port: ${PORT}`));
+}
+module.exports = { start, app, connectToMongoDB };

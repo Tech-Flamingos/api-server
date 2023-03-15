@@ -3,7 +3,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const SECRET = process.env.SECRET || 'secretString';
-const UserSchema = require('../models/user');
+const UserSchema = require('./testUsers');
 
 let authenticateBasic = async (username, password) => {
   const user = await UserSchema.findOne({ name: username });
