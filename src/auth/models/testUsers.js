@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const SECRET = process.env.SECRET || 'secretString';
 
-const UserSchema = new mongoose.Schema({
+const TestUserSchema = new mongoose.Schema({
   name: { type: 'String', required: true, unique: true },
   password: { type: 'String', required: true },
   role: { type: 'String', enum: ['user', 'writer', 'admin'], default: 'user', required: true },
@@ -24,10 +24,10 @@ const UserSchema = new mongoose.Schema({
 
 });
 
-UserSchema.pre('save', async function (next) {
+TestUserSchema.pre('save', async function (next) {
   let user = this;
   let hashedPass = await bcrypt.hash(user.password, 10);
   user.password = hashedPass;
 });
 
-module.exports = mongoose.model('users', UserSchema);
+module.exports = mongoose.model('testUsers', TestUserSchema);
