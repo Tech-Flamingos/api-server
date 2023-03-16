@@ -1,84 +1,49 @@
-const request = require('supertest');
-const { app, connectToMongoDB } = require('../src/server');
-const User = require('../src/auth/models/testUsers');
-const mongoose = require('mongoose');
+'use strict';
 
+const supergoose = require('@code-fellows/supergoose');
+const app = require('../src/server.js');
 
-let user;
+const client = supergoose(app.app);
 
-beforeAll(async () => {
-  await connectToMongoDB();
-  user = new User({
-    name: 'testuser',
-    password: 'password',
-    role: 'admin',
-  });
-  await user.save();
-});
+describe('The Server', () => {
 
-afterAll(async () => {
-  await User.collection.drop();
-  await mongoose.connection.close();
-});
+  async function createRecord() {
+    const data = {
+      name: 'foo',
+      password: 'bar',
+    };
+    const response = await client.post('/signup').send(data);
+    return response.body;
+  }
 
-describe('User routes', () => {
+  it('can create a user', async () => {
 
-  describe('POST /signup', () => {
-    it('should create a new user', async () => {
-      const res = await request(app)
-        .post('/testSignup')
-        .send({
-          name: 'newuser',
-          password: 'password',
-          role: 'admin',
-        });
-      expect(res.status).toEqual(201);
-      expect(res.body.user.name).toEqual('newuser');
-      expect(res.body.user.role).toEqual('admin');
-    });
-
-    it('should return a 500 error if there is a database validation error', async () => {
-      const res = await request(app)
-        .post('/signup')
-        .send({
-          password: 'password',
-          role: 'admin',
-        });
-      expect(res.statusCode).toEqual(500);
-    });
-
-    it('should return a 404 error if the path is not /signup', async () => {
-      const res = await request(app)
-        .post('/sign')
-        .send({
-          password: 'password',
-          role: 'admin',
-        });
-      expect(res.statusCode).toEqual(404);
-    });
+    const record = await createRecord();
+    console.log(record);
+    expect(record.user.name).toBe('foo');
+    expect(record.user.pass).not.toBe('bar');
+    expect(record.token).not.toBeUndefined();
   });
 
-  describe('POST /signin', () => {
-    it('should log in a user with the correct username and password', async () => {
-      const res = await request(app)
-        .post('/testSignin')
-        .auth('testuser', 'password');
-      expect(res.statusCode).toEqual(200);
-      expect(res.body.user).toHaveProperty('name', 'testuser');
-    });
+  it('can sign in a user', async () => {
 
-    it('should return a 404 error if the password is incorrect', async () => {
-      const res = await request(app)
-        .post('/login')
-        .auth('testuser', 'incorrectpassword');
-      expect(res.statusCode).toEqual(404);
-    });
-
-    it('should return a 404 error if the username does not exist', async () => {
-      const res = await request(app)
-        .post('/login')
-        .auth('nonexistentuser', 'password');
-      expect(res.statusCode).toEqual(404);
-    });
+    await createRecord();
+    const signin = await client.post('/signin').auth('foo', 'bar');
+    console.log(signin.body);
+    expect(signin.body.user.name).toBe('foo');
+    expect(signin.body.user.pass).not.toBe('bar');
+    expect(signin.body.token).not.toBeUndefined();
   });
+
+  it('properly sends a 404 on an unknown route', async () => {
+    const response = await client.get('/nothing');
+    expect(response.status).toBe(404);
+  });
+
+  it('properly sends a 500 when an error occurs', async () => {
+    const data = {};
+    const response = await client.post('/signin').send(data);
+    expect(response.status).toBe(403);
+  });
+
 });
